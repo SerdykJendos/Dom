@@ -1,0 +1,55 @@
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+
+public class MainActivity extends AppCompatActivity {
+
+    private Button servoOnButton;
+    private Button servoOffButton;
+    // Додайте інші кнопки або елементи керування
+    
+    private Socket socket;
+    private PrintWriter output;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        servoOnButton = findViewById(R.id.servo_on_button);
+        servoOffButton = findViewById(R.id.servo_off_button);
+        // Ініціалізуйте інші кнопки або елементи керування
+        
+        servoOnButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendCommandToESP("SERVO_ON");
+            }
+        });
+
+        servoOffButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendCommandToESP("SERVO_OFF");
+            }
+        });
+        // Додайте обробники подій для інших кнопок або елементів керування
+    }
+
+    private void sendCommandToESP(final String command) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (socket == null || output == null) {
+                        socket = new Socket("ESP_IP_ADDRESS", 8888);
+                        output = new PrintWriter(socket.getOutputStream(), true);
+                    }
+                    output.println(command);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+}
